@@ -19,12 +19,12 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           ref: master
 
-      - name: Set up JDK 16
-        uses: actions/setup-java@v2
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
         with:
           distribution: 'adopt'
           java-version: '17'
@@ -32,16 +32,14 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build
 
-      - uses: actions/github-script@v2
+      - uses: actions/github-script@v7
         id: fname
         with:
           result-encoding: string
           script: |
             const fs = require("fs")
             return fs.readdirSync("./build/libs/").filter(e => !e.endsWith("dev.jar") && !e.endsWith("sources.jar") && !e.endsWith("all.jar") && e.endsWith(".jar"))[0].replace(".jar", "");
-      - name: Upload to release
-        uses: JasonEtco/upload-to-release@master
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
-          args: ./build/libs/${{ steps.fname.outputs.result }}.jar application/jar
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          path: ./build/libs/${{ steps.fname.outputs.result }}.jar
